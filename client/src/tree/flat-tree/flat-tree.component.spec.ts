@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TreeComponent } from './tree.component';
+import { FlatTreeComponent } from './flat-tree.component';
 
-describe('TreeComponent', () => {
-  let component: TreeComponent;
-  let fixture: ComponentFixture<TreeComponent>;
+describe('FlatTreeComponent', () => {
+  let component: FlatTreeComponent;
+  let fixture: ComponentFixture<FlatTreeComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TreeComponent]
+      imports: [FlatTreeComponent]
     })
     .compileComponents();
     
-    fixture = TestBed.createComponent(TreeComponent);
+    fixture = TestBed.createComponent(FlatTreeComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
