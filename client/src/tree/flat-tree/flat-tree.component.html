@@ -1,24 +1,39 @@
-<cdk-tree [dataSource]="dataSource" [treeControl]="treeControl">
-  <!-- This is the tree node template for leaf nodes -->
+@if (loading()) {
+  Loading initial data....
+}
+<div
+  style="right: 0; bottom: 0; height: 200px; width: 200px; position: fixed; display: flex; flex-direction: column; justify-items: center; background-color: bisque">
+  <i style="text-align: center">Selected Nodes</i>
+  {{selectedNodes() | json}}
+<!--  {{}}-->
+</div>
+<cdk-tree [dataSource]="datasource" [treeControl]="treeControl">
   <cdk-tree-node *cdkTreeNodeDef="let node" cdkTreeNodePadding
-                 [style.display]="shouldRender(node) ? 'flex' : 'none'"
-                 class="example-tree-node">
-    <!-- use a disabled button to provide padding for tree leaf -->
-    <button mat-icon-button disabled></button>
-    {{node.name}}
-  </cdk-tree-node>
-  <!-- This is the tree node template for expandable nodes -->
-  <cdk-tree-node *cdkTreeNodeDef="let node; when: hasChild" cdkTreeNodePadding
-                 [style.display]="shouldRender(node) ? 'flex' : 'none'"
-                 class="example-tree-node">
-    <button mat-icon-button cdkTreeNodeToggle
-            [attr.aria-label]="'Toggle ' + node.name"
-            (click)="node.isExpanded = !node.isExpanded"
-            [style.visibility]="node.expandable ? 'visible' : 'hidden'">
-      <mat-icon class="mat-icon-rtl-mirror">
-        {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
-      </mat-icon>
-    </button>
-    {{node.name}}
+                 class="tree-node">
+    @if (node | asTreeNode) {
+
+    }
+    <div style="display: flex; flex-direction: row; align-items: center; justify-items: end">
+      @if (hasChild(node)) {
+        <button mat-icon-button cdkTreeNodeToggle
+                [attr.aria-label]="'Toggle ' + node.name"
+                [style.visibility]="node.expandable ? 'visible' : 'hidden'">
+          <mat-icon class="mat-icon-rtl-mirror">
+            {{ treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right' }}
+          </mat-icon>
+        </button>
+      } @else {
+        <button mat-icon-button disabled cdkTreeNodePadding></button>
+      }
+      <input type="checkbox" [value]="(node | asTreeNode).selected()" (click)="toggleNodeSelect(node)">
+      {{ (node | asTreeNode).data.text }}
+      @if ((node | asTreeNode).loading()) {
+        Loading...
+      }
+    </div>
+
+    @if ((node | asTreeNode).options().has(TreeOption.Last)) {
+      <button (click)="loadMore(node)">Load more...</button>
+    }
   </cdk-tree-node>
 </cdk-tree>

@@ -1,4 +1,5 @@
-.example-tree-node {
+.tree-node {
   display: flex;
-  align-items: center;
+  align-items: start;
+  flex-direction: column;
 }
