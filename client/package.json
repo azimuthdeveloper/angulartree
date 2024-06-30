@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "makeapi": "openapi-generator-cli generate -i http://localhost:3000/api-docs -g typescript-angular -o ./pokemonapi -p npmName=pokemonapi -p apiModulePrefix=PokemonApi --enable-post-process-file"
+    "makeapi": "openapi-generator-cli generate -i http://localhost:3000/api-docs -g typescript-angular -o ./pokemonapi -p npmName=pokemonapi -p apiModulePrefix=PokemonApi --enable-post-process-file --skip-validate-spec "
   },
   "private": true,
   "dependencies": {

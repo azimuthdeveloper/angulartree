@@ -10,7 +10,7 @@ import {
 } from "@angular/cdk/tree";
 import {MatIconButton} from "@angular/material/button";
 import {BehaviorSubject, firstValueFrom, map, merge, Observable, of} from "rxjs";
-import {DataService, LongDataItem} from "../../../pokemonapi";
+import {DataService, LongData} from "../../../pokemonapi";
 import {ArrayDataSource, CollectionViewer, DataSource, SelectionChange} from "@angular/cdk/collections";
 import {AsTreeNodePipe} from "../../pipes/as-tree-node.pipe";
 import {AsyncPipe, JsonPipe} from "@angular/common";
@@ -75,7 +75,7 @@ export class FlatTreeNode {
   loading = signal(false);
   options = signal<Set<TreeOption>>(new Set<TreeOption>())
   selected = signal(false);
-  constructor(public level: number, public data: LongDataItem) {
+  constructor(public level: number, public data: LongData) {
   }
 }
 

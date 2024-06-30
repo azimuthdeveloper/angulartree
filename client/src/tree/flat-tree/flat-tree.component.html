@@ -4,8 +4,7 @@
 <div
   style="right: 0; bottom: 0; height: 200px; width: 200px; position: fixed; display: flex; flex-direction: column; justify-items: center; background-color: bisque">
   <i style="text-align: center">Selected Nodes</i>
-  {{selectedNodes() | json}}
-<!--  {{}}-->
+  {{ selectedNodes() | json }}
 </div>
 <cdk-tree [dataSource]="datasource" [treeControl]="treeControl">
   <cdk-tree-node *cdkTreeNodeDef="let node" cdkTreeNodePadding
@@ -26,7 +25,7 @@
         <button mat-icon-button disabled cdkTreeNodePadding></button>
       }
       <input type="checkbox" [value]="(node | asTreeNode).selected()" (click)="toggleNodeSelect(node)">
-      {{ (node | asTreeNode).data.text }}
+      {{ (node | asTreeNode).data.item }}
       @if ((node | asTreeNode).loading()) {
         Loading...
       }

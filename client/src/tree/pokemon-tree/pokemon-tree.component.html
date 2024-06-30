@@ -1,0 +1,44 @@
+<cdk-tree [dataSource]="nestedDataSource" [treeControl]="nestedTreeControl"
+          style="display: flex; flex-direction: column" [trackBy]="trackBy">
+  <cdk-nested-tree-node *cdkTreeNodeDef="let node" class="example-tree-node">
+    <div style="flex-direction: row">
+      @if ((node | asPokemonNode).expandable) {
+        <button mat-icon-button cdkTreeNodeToggle>
+          <mat-icon>
+            @if (nestedTreeControl.isExpanded(node)) {
+              expand_more
+            } @else {
+              chevron_right
+            }
+          </mat-icon>
+        </button>
+      } @else {
+        <button disabled mat-icon-button>
+          <mat-icon></mat-icon>
+        </button>
+      }
+
+      {{ (node | asPokemonNode).label }}
+      <!--      {{(node | asPokemonNode).data | json}}-->
+      @if ((node |asPokemonNode).loading()) {
+        Loading...
+      }
+
+      @if ((node | asPokemonNode).parent) {
+        @if (isLast(node, node.parent?.children | async)) {
+          <button
+            (click)="loadMore(node.parent.type, indexOf(node, node.parent.children.value), node.parent.parent.label, node.parent)">
+            Load more...
+          </button>
+        }
+      }
+
+    </div>
+    @if (nestedTreeControl.isExpanded(node)) {
+      <div style="display: flex; flex-direction: column; padding-left: 16px; border: 2px solid black">
+        <ng-container cdkTreeNodeOutlet>
+        </ng-container>
+      </div>
+    }
+  </cdk-nested-tree-node>
+</cdk-tree>

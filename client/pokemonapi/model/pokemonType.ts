@@ -12,28 +12,12 @@
 
 
 /**
- * PokemonDetails
+ * PokemonType
  */
-export interface PokemonDetails { 
-    /**
-     * The color of the Pokemon
-     */
-    color?: string;
-    /**
-     * The weight of the Pokemon
-     */
-    weight?: string;
-    /**
-     * The height of the Pokemon
-     */
-    height?: string;
+export interface PokemonType { 
     /**
      * The type of the Pokemon
      */
     type?: string;
-    /**
-     * The category of the Pokemon
-     */
-    category?: string;
 }
 

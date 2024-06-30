@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const expressJSDocSwagger = require('express-jsdoc-swagger');
 const cors = require('cors');
 
-
+const port = 3000;
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
@@ -41,7 +41,7 @@ const pokemonPowers = {
   Gengar: ['Lick', 'Shadow Ball', 'Hypnosis', 'Dream Eater', 'Night Shade'],
 };
 
-const pokemonAppearances = {
+const pokemonDetails = {
   Pikachu: {
     color: 'Yellow',
     weight: '6.0 kg',
@@ -157,13 +157,38 @@ const pokemonAppearances = {
 const longData = Array.from({ length: 1000 }, (_, i) => `Item ${i + 1}`);
 
 /**
- * GET /pokemon-powers
- * @summary Returns a list of Pokemon powers
+ * GET /pokemon-details-by-name
+ * @summary Returns detailed information about a given Pokemon specified in the query parameter
  * @tags Pokemon
- * @return {array<string>} 200 - success response
+ * @param {string} name.query.required - Pokemon name
+ * @return {PokemonDetails} 200 - success response
+ * @return {Error} 404 - error response
+ */
+app.get('/pokemon-details-by-name', (req, res) => {
+  const { name } = req.query;
+  if (pokemonDetails[name]) {
+    const details = {
+      color: pokemonDetails[name].color,
+      weight: pokemonDetails[name].weight,
+      height: pokemonDetails[name].height,
+      type: pokemonDetails[name].type,
+      category: pokemonDetails[name].category,
+    };
+    res.json(details);
+  } else {
+    res.status(404).json({ error: 'Pokemon not found' });
+  }
+});
+
+/**
+ * GET /pokemon-powers
+ * @summary Returns a list of powers for all known Pokemon
+ * @tags Pokemon
+ * @return {array<PokemonPower>} 200 - success response
  */
 app.get('/pokemon-powers', (req, res) => {
-  res.json(Object.keys(pokemonPowers));
+  const data = Object.keys(pokemonPowers).map(name => ({ name, powers: pokemonPowers[name] }));
+  res.json(data);
 });
 
 /**
@@ -171,40 +196,105 @@ app.get('/pokemon-powers', (req, res) => {
  * @summary Returns a list of powers for a given Pokemon specified in the query parameter
  * @tags Pokemon
  * @param {string} name.query.required - Pokemon name
- * @return {array<string>} 200 - success response
- * @return {object} 404 - error response
+ * @return {PokemonPower} 200 - success response
+ * @return {Error} 404 - error response
  */
 app.get('/pokemon-powers-by-name', (req, res) => {
   const { name } = req.query;
   if (pokemonPowers[name]) {
-    res.json(pokemonPowers[name]);
+    res.json({ name, powers: pokemonPowers[name] });
   } else {
     res.status(404).json({ error: 'Pokemon not found' });
   }
 });
 
 /**
- * GET /pokemon-appearances-by-name
- * @summary Returns a list of games, TV shows, books, and posters for a given Pokemon specified in the query parameter, with support for skip and take commands
+ * GET /pokemon-names
+ * @summary Returns a list of names of known Pokemon
+ * @tags Pokemon
+ * @return {array<PokemonName>} 200 - success response
+ */
+app.get('/pokemon-names', (req, res) => {
+  const names = Object.keys(pokemonPowers).map(name => ({ name }));
+  res.json(names);
+});
+
+
+/**
+ * GET /pokemon-games-by-name
+ * @summary Returns a list of games a given Pokemon has appeared in, specified in the query parameter
  * @tags Pokemon
  * @param {string} name.query.required - Pokemon name
  * @param {integer} skip.query - Number of items to skip
  * @param {integer} take.query - Number of items to take
- * @return {object} 200 - success response
- * @return {object} 404 - error response
+ * @return {array<string>} 200 - success response
+ * @return {Error} 404 - error response
  */
-app.get('/pokemon-appearances-by-name', (req, res) => {
-  const { name, skip = 0, take = 20 } = req.query;
-  if (pokemonAppearances[name]) {
-    const appearances = pokemonAppearances[name];
-    const allAppearances = [
-      ...appearances.games,
-      ...appearances.tvShows,
-      ...appearances.books,
-      ...appearances.posters
-    ];
-    const result = allAppearances.slice(parseInt(skip), parseInt(skip) + parseInt(take));
-    res.json(result);
+app.get('/pokemon-games-by-name', (req, res) => {
+  const { name, skip = 0, take = 10 } = req.query;
+  if (pokemonDetails[name]) {
+    const data = pokemonDetails[name].games.slice(skip, skip + take);
+    res.json(data);
+  } else {
+    res.status(404).json({ error: 'Pokemon not found' });
+  }
+});
+
+/**
+ * GET /pokemon-tvshows-by-name
+ * @summary Returns a list of TV shows a given Pokemon has appeared in, specified in the query parameter
+ * @tags Pokemon
+ * @param {string} name.query.required - Pokemon name
+ * @param {integer} skip.query - Number of items to skip
+ * @param {integer} take.query - Number of items to take
+ * @return {array<string>} 200 - success response
+ * @return {Error} 404 - error response
+ */
+app.get('/pokemon-tvshows-by-name', (req, res) => {
+  const { name, skip = 0, take = 10 } = req.query;
+  if (pokemonDetails[name]) {
+    const data = pokemonDetails[name].tvShows.slice(skip, skip + take);
+    res.json(data);
+  } else {
+    res.status(404).json({ error: 'Pokemon not found' });
+  }
+});
+
+/**
+ * GET /pokemon-books-by-name
+ * @summary Returns a list of books a given Pokemon has appeared in, specified in the query parameter
+ * @tags Pokemon
+ * @param {string} name.query.required - Pokemon name
+ * @param {integer} skip.query - Number of items to skip
+ * @param {integer} take.query - Number of items to take
+ * @return {array<string>} 200 - success response
+ * @return {Error} 404 - error response
+ */
+app.get('/pokemon-books-by-name', (req, res) => {
+  const { name, skip = 0, take = 10 } = req.query;
+  if (pokemonDetails[name]) {
+    const data = pokemonDetails[name].books.slice(skip, skip + take);
+    res.json(data);
+  } else {
+    res.status(404).json({ error: 'Pokemon not found' });
+  }
+});
+
+/**
+ * GET /pokemon-posters-by-name
+ * @summary Returns a list of posters a given Pokemon has appeared in, specified in the query parameter
+ * @tags Pokemon
+ * @param {string} name.query.required - Pokemon name
+ * @param {integer} skip.query - Number of items to skip
+ * @param {integer} take.query - Number of items to take
+ * @return {array<string>} 200 - success response
+ * @return {Error} 404 - error response
+ */
+app.get('/pokemon-posters-by-name', (req, res) => {
+  const { name, skip = 0, take = 10 } = req.query;
+  if (pokemonDetails[name]) {
+    const data = pokemonDetails[name].posters.slice(skip, skip + take);
+    res.json(data);
   } else {
     res.status(404).json({ error: 'Pokemon not found' });
   }
@@ -212,59 +302,53 @@ app.get('/pokemon-appearances-by-name', (req, res) => {
 
 /**
  * GET /long-data
- * @summary Returns a long set of data with support for skip and take commands
+ * @summary Returns a long list of data items with skip and take functionality
  * @tags Data
  * @param {integer} skip.query - Number of items to skip
  * @param {integer} take.query - Number of items to take
- * @return {array<LongDataItem>} 200 - success response
+ * @return {array<LongData>} 200 - success response
  */
 app.get('/long-data', (req, res) => {
-  const skip = parseInt(req.query.skip) || 0;
-  const take = parseInt(req.query.take) || 10;
-  const data = longData.slice(skip, skip + take).map((item, index) => ({ text: item, index: skip + index }));
-  res.json(data);
+  const { skip = 0, take = 10 } = req.query;
+  const data = longData.slice(skip, skip + take).map((item, index) => ({ index: skip + index, item }));
+  setTimeout(() => res.json(data), 2000);
 });
 
 /**
- * A LongDataItem
- * @typedef {object} LongDataItem
- * @property {string} text - The text of the item
- * @property {number} index - The index of the item
+ * PokemonPower
+ * @typedef {object} PokemonPower
+ * @property {string} name - The name of the Pokemon
+ * @property {array<string>} powers - The powers of the Pokemon
  */
 
 /**
- * GET /pokemon-powers-by-name
- * @summary Returns a list of powers for a given Pokemon specified in the query parameter
- * @tags Pokemon
- * @param {string} name.query.required - Pokemon name
- * @return {array<string>} 200 - success response
- * @return {Error} 404 - error response
+ * PokemonName
+ * @typedef {object} PokemonName
+ * @property {string} name - The name of the Pokemon
  */
 
 /**
- * An Error
- * @typedef {object} Error
- * @property {string} error - Error message
+ * PokemonColor
+ * @typedef {object} PokemonColor
+ * @property {string} color - The color of the Pokemon
  */
 
 /**
- * GET /pokemon-appearances-by-name
- * @summary Returns a list of games, TV shows, books, and posters for a given Pokemon specified in the query parameter, with support for skip and take commands
- * @tags Pokemon
- * @param {string} name.query.required - Pokemon name
- * @param {integer} skip.query - Number of items to skip
- * @param {integer} take.query - Number of items to take
- * @return {array<string>} 200 - success response
- * @return {Error} 404 - error response
+ * PokemonWeight
+ * @typedef {object} PokemonWeight
+ * @property {string} weight - The weight of the Pokemon
  */
 
 /**
- * GET /pokemon-details-by-name
- * @summary Returns detailed information about a given Pokemon specified in the query parameter
- * @tags Pokemon
- * @param {string} name.query.required - Pokemon name
- * @return {PokemonDetails} 200 - success response
- * @return {Error} 404 - error response
+ * PokemonHeight
+ * @typedef {object} PokemonHeight
+ * @property {string} height - The height of the Pokemon
+ */
+
+/**
+ * PokemonType
+ * @typedef {object} PokemonType
+ * @property {string} type - The type of the Pokemon
  */
 
 /**
@@ -275,27 +359,40 @@ app.get('/long-data', (req, res) => {
  * @property {string} height - The height of the Pokemon
  * @property {string} type - The type of the Pokemon
  * @property {string} category - The category of the Pokemon
- * @property {array<string>} games - Games the Pokemon has appeared in
- * @property {array<string>} tvShows - TV shows the Pokemon has appeared in
- * @property {array<string>} books - Books the Pokemon has appeared in
- * @property {array<string>} posters - Posters featuring the Pokemon
  */
-/**
- * GET /pokemon-details-by-name
- * @summary Returns detailed information about a given Pokemon specified in the query parameter
- * @tags Pokemon
- * @param {string} name.query.required - Pokemon name
- * @return {object} 200 - success response
- * @return {object} 404 - error response
- */
-app.get('/pokemon-details-by-name', (req, res) => {
-  const { name } = req.query;
-  if (pokemonAppearances[name]) {
-    res.json(pokemonAppearances[name]);
-  } else {
-    res.status(404).json({ error: 'Pokemon not found' });
-  }
-});
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+/**
+ * PokemonGame
+ * @typedef {object} PokemonGame
+ * @property {string} game - The name of the game
+ */
+
+/**
+ * PokemonTVShow
+ * @typedef {object} PokemonTVShow
+ * @property {string} tvShow - The name of the TV show
+ */
+
+/**
+ * PokemonBook
+ * @typedef {object} PokemonBook
+ * @property {string} book - The name of the book
+ */
+
+/**
+ * PokemonPoster
+ * @typedef {object} PokemonPoster
+ * @property {string} poster - The name of the poster
+ */
+
+/**
+ * LongData
+ * @typedef {object} LongData
+ * @property {integer} index - The index of the data item
+ * @property {string} item - The data item
+ */
+
+app.listen(port, () => {
+  console.log(`Pokemon API listening at http://localhost:${port}`);
+});
