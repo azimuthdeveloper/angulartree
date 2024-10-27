@@ -105,6 +105,7 @@ export class NestedTreeComponent implements OnInit {
     // Retrieve the next set of nodes from the server
     let childData = await firstValueFrom(this.data.longDataGet(node.data.index! + 1, 10));
     // Convert them to NestedTreeNode. Set the parent of the new nodes (not this node, this nodes parent)
+    debugger;
     let childNodes = childData.map(x => new NestedTreeNode(node.level, x, node.parent));
     // Retrieve the existing children array
     let existingChildren = node.parent?.children.value;

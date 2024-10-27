@@ -1,4 +1,4 @@
-import {Component, computed, effect, OnInit, signal} from '@angular/core';
+import {Component, computed, effect, OnInit, signal, ViewChild, ViewRef} from '@angular/core';
 import {MatIcon} from "@angular/material/icon";
 import {
   CdkTree,
@@ -6,12 +6,11 @@ import {
   CdkTreeNodeDef,
   CdkTreeNodePadding,
   CdkTreeNodeToggle,
-  FlatTreeControl
 } from "@angular/cdk/tree";
 import {MatIconButton} from "@angular/material/button";
 import {BehaviorSubject, firstValueFrom, map, merge, Observable, of} from "rxjs";
 import {DataService, LongData} from "../../../pokemonapi";
-import {ArrayDataSource, CollectionViewer, DataSource, SelectionChange} from "@angular/cdk/collections";
+import {ArrayDataSource, CollectionViewer, DataSource, SelectionChange, SelectionModel} from "@angular/cdk/collections";
 import {AsTreeNodePipe} from "../../pipes/as-tree-node.pipe";
 import {AsyncPipe, JsonPipe} from "@angular/common";
 
@@ -39,13 +38,16 @@ export class FlatTreeComponent implements OnInit {
 
   loading = signal(true);
   selectedNodes = signal([] as Array<FlatTreeNode>);
+  @ViewChild(CdkTree) tree: CdkTree<FlatTreeNode> | undefined;
 
   hasChild = (node: FlatTreeNode) => node.expandable();
-  treeControl = new FlatTreeControl<FlatTreeNode>(node => node.level, node => node.expandable());
+  getChildren = (node: FlatTreeNode) => node.level;
+  // treeControl = new FlatTreeControl<FlatTreeNode>(node => node.level, node => node.expandable());
   datasource: FlatTreeDataSource;
 
   constructor(private dataService: DataService) {
-    this.datasource = new FlatTreeDataSource(this.treeControl, dataService);
+    this.datasource = new FlatTreeDataSource(dataService, this.tree?._getExpansionModel());
+
   }
 
   data = new BehaviorSubject<Array<string>>([]);
@@ -53,9 +55,22 @@ export class FlatTreeComponent implements OnInit {
   async ngOnInit() {
     await this.datasource.loadInitialData();
     this.loading.set(false);
+    // let expansionModel =
+
   }
 
   protected readonly TreeOption = TreeOption;
+  // loadRows: ((dataNode: FlatTreeNode) => (dataNode: FlatTreeNode) => FlatTreeNode) | undefined;
+  childrenAccessor = (dataNode: FlatTreeNode) => {
+    return (node: FlatTreeNode): Array<FlatTreeNode> => {
+      return new Array<FlatTreeNode>();
+      // Here you would perform any logic needed to retrieve or manipulate the child node
+      // return node;  // Return the same node or manipulate it as needed
+    };
+  };
+
+
+
 
   loadMore(node : FlatTreeNode) {
     this.datasource.loadMore(node);
@@ -67,7 +82,6 @@ export class FlatTreeComponent implements OnInit {
     // let selectedNodes = this.datasource.dataChange.value.filter(x => x.selected());
     // console.log(selectedNodes);
   }
-
 }
 
 export class FlatTreeNode {
@@ -75,9 +89,16 @@ export class FlatTreeNode {
   loading = signal(false);
   options = signal<Set<TreeOption>>(new Set<TreeOption>())
   selected = signal(false);
+
+  expandNode = (node: FlatTreeNode) => {
+    return new Array<FlatTreeNode>();
+  };
+
   constructor(public level: number, public data: LongData) {
   }
 }
+
+
 
 class FlatTreeDataSource implements DataSource<FlatTreeNode> {
 
@@ -88,7 +109,7 @@ class FlatTreeDataSource implements DataSource<FlatTreeNode> {
 
   dataChange = new BehaviorSubject<FlatTreeNode[]>([]);
 
-  constructor(private _treeControl: FlatTreeControl<FlatTreeNode>, private _api: DataService) {
+  constructor(private _api: DataService, private expansionModel: SelectionModel<FlatTreeNode> | undefined) {
   }
 
   get data(): FlatTreeNode[] {
@@ -96,7 +117,7 @@ class FlatTreeDataSource implements DataSource<FlatTreeNode> {
   }
 
   set data(value: FlatTreeNode[]) {
-    this._treeControl.dataNodes = value;
+    // this._treeControl.dataNodes = value;
     this.dataChange.next(value);
   }
 
@@ -111,7 +132,7 @@ class FlatTreeDataSource implements DataSource<FlatTreeNode> {
   }
 
   connect(collectionViewer: CollectionViewer): Observable<FlatTreeNode[]> {
-    this._treeControl.expansionModel.changed.subscribe(change => {
+    this.expansionModel?.changed.subscribe(change => {
       if (
         (change as SelectionChange<FlatTreeNode>).added ||
         (change as SelectionChange<FlatTreeNode>).removed

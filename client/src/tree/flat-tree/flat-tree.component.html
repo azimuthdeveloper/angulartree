@@ -6,19 +6,19 @@
   <i style="text-align: center">Selected Nodes</i>
   {{ selectedNodes() | json }}
 </div>
-<cdk-tree [dataSource]="datasource" [treeControl]="treeControl">
+<cdk-tree [dataSource]="datasource" #tree [childrenAccessor]="childrenAccessor">
   <cdk-tree-node *cdkTreeNodeDef="let node" cdkTreeNodePadding
                  class="tree-node">
-    @if (node | asTreeNode) {
+<!--    @if (node | asTreeNode) {-->
 
-    }
+<!--    }-->
     <div style="display: flex; flex-direction: row; align-items: center; justify-items: end">
       @if (hasChild(node)) {
         <button mat-icon-button cdkTreeNodeToggle
                 [attr.aria-label]="'Toggle ' + node.name"
                 [style.visibility]="node.expandable ? 'visible' : 'hidden'">
           <mat-icon class="mat-icon-rtl-mirror">
-            {{ treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right' }}
+            {{ tree.isExpanded(node) ? 'expand_more' : 'chevron_right' }}
           </mat-icon>
         </button>
       } @else {
