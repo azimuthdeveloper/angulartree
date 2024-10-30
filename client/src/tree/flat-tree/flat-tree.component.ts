@@ -60,14 +60,7 @@ export class FlatTreeComponent implements OnInit {
   }
 
   protected readonly TreeOption = TreeOption;
-  // loadRows: ((dataNode: FlatTreeNode) => (dataNode: FlatTreeNode) => FlatTreeNode) | undefined;
-  childrenAccessor = (dataNode: FlatTreeNode) => {
-    return (node: FlatTreeNode): Array<FlatTreeNode> => {
-      return new Array<FlatTreeNode>();
-      // Here you would perform any logic needed to retrieve or manipulate the child node
-      // return node;  // Return the same node or manipulate it as needed
-    };
-  };
+  treeLevelAccessor =(dataNode: FlatTreeNode)  => dataNode.level;
 
 
 
@@ -81,6 +74,14 @@ export class FlatTreeComponent implements OnInit {
     this.selectedNodes.set(this.datasource.dataChange.value.filter(x => x.selected()));
     // let selectedNodes = this.datasource.dataChange.value.filter(x => x.selected());
     // console.log(selectedNodes);
+  }
+
+  handleNodeExpansionStateChange($event: boolean, node :FlatTreeNode) {
+    if ($event) {
+      this.datasource.toggleNode(node, true);
+    } else {
+      this.datasource.toggleNode(node, false);
+    }
   }
 }
 
@@ -181,9 +182,9 @@ class FlatTreeDataSource implements DataSource<FlatTreeNode> {
     // If we are expanding the node...
     if (expand) {
       // Retrieve nodes from API
-      let children = await firstValueFrom(this._api.longDataGet(node.data.index, 10));
+      let children = await firstValueFrom(this._api.longDataGet(Number(node.data.index), 10));
       // Map them to our TreeNode type
-      let nodes = children.map(x => new FlatTreeNode(node.level + 1, x));
+      let nodes = children.map(x => new FlatTreeNode(Number(node.level) + 1, x));
       // For the last node in our retrieved list, set the last node option of TreeOption.Last (to show the "Load more..." button)
       nodes[nodes.length - 1].options.update(x => x.add(TreeOption.Last));
       if (!children || index < 0) {

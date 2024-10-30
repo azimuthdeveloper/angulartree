@@ -8,9 +8,9 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-app.use((req, res, next) => {
-  setTimeout(next, 2000);
-});
+// app.use((req, res, next) => {
+//   setTimeout(next, 2000);
+// });
 
 const options = {
   info: {
@@ -309,9 +309,11 @@ app.get('/pokemon-posters-by-name', (req, res) => {
  * @return {array<LongData>} 200 - success response
  */
 app.get('/long-data', (req, res) => {
-  const { skip = 0, take = 10 } = req.query;
+  const skip = parseInt(req.query.skip, 10) || 0;
+  const take = parseInt(req.query.take, 10) || 10;
   const data = longData.slice(skip, skip + take).map((item, index) => ({ index: skip + index, item }));
-  setTimeout(() => res.json(data), 2000);
+  res.json(data);
+  // setTimeout(() => res.json(data), 2000);
 });
 
 /**

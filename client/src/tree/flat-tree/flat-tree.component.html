@@ -6,9 +6,9 @@
   <i style="text-align: center">Selected Nodes</i>
   {{ selectedNodes() | json }}
 </div>
-<cdk-tree [dataSource]="datasource" #tree [childrenAccessor]="childrenAccessor">
+<cdk-tree [dataSource]="datasource" #tree [levelAccessor]="treeLevelAccessor">
   <cdk-tree-node *cdkTreeNodeDef="let node" cdkTreeNodePadding
-                 class="tree-node">
+                 class="tree-node" (expandedChange)="handleNodeExpansionStateChange($event, node)" >
 <!--    @if (node | asTreeNode) {-->
 
 <!--    }-->
