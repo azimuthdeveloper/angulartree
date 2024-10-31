@@ -68,16 +68,6 @@ export class PokemonTreeComponent implements OnInit {
     return `${node.level}${node.label}`
   }
 
-
-  private handleTreeControl(change: SelectionChange<PokemonTreeNode>) {
-    if (change.added) {
-      change.added.forEach(x => this.toggleNode(x, true));
-    }
-    if (change.removed) {
-      change.removed.slice().reverse().forEach(x => this.toggleNode(x, false));
-    }
-  }
-
   indexOf(node: PokemonTreeNode, nodes: Array<PokemonTreeNode> | undefined | null) {
     debugger;
     if (!nodes) {
