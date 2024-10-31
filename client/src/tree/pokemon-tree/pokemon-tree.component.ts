@@ -6,8 +6,7 @@ import {
   CdkTree,
   CdkTreeNodeDef,
   CdkTreeNodeOutlet,
-  CdkTreeNodeToggle,
-  NestedTreeControl
+  CdkTreeNodeToggle
 } from "@angular/cdk/tree";
 import {MatIcon} from "@angular/material/icon";
 import {MatIconButton} from "@angular/material/button";
@@ -40,24 +39,26 @@ import {AsyncPipe, JsonPipe} from "@angular/common";
 })
 export class PokemonTreeComponent implements OnInit {
 
-  nestedTreeControl: NestedTreeControl<PokemonTreeNode>;
+  // nestedTreeControl: NestedTreeControl<PokemonTreeNode>;
   nestedDataSource: MatTreeNestedDataSource<PokemonTreeNode>;
+  childrenAccessor = (node: PokemonTreeNode) => node.children;
+
 
   private subscription?: Subscription;
 
   constructor(private data: PokemonService) {
-    this.nestedTreeControl = new NestedTreeControl<PokemonTreeNode>(x => x.children);
+    // this.nestedTreeControl = new NestedTreeControl<PokemonTreeNode>(x => x.children);
     this.nestedDataSource = new MatTreeNestedDataSource<PokemonTreeNode>();
   }
 
   async ngOnInit() {
     let rootNodes = await firstValueFrom(this.data.pokemonNamesGet());
     let treeNodes = rootNodes.map(x => new PokemonTreeNode(0, x.name!, PokemonNodeType.PokemonDetailsNode, true));
-    this.subscription = this.nestedTreeControl.expansionModel.changed.subscribe(change => {
-      if (change.added || change.removed) {
-        this.handleTreeControl(change);
-      }
-    });
+    // this.subscription = this.nestedTreeControl.expansionModel.changed.subscribe(change => {
+    //   if (change.added || change.removed) {
+    //     this.handleTreeControl(change);
+    //   }
+    // });
 
     this.nestedDataSource.data = [...treeNodes];
 
@@ -179,6 +180,10 @@ export class PokemonTreeComponent implements OnInit {
 
 
   protected readonly TreeOption = TreeOption;
+
+  handleNodeExpansion($event: boolean, node: PokemonTreeNode) {
+    this.toggleNode(node, $event);
+  }
 }
 
 export class PokemonTreeNode {

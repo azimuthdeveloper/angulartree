@@ -10,5 +10,4 @@ export class AsPokemonNodePipe implements PipeTransform {
   transform(value: unknown, ...args: unknown[]) {
     return value as PokemonTreeNode;
   }
-
 }

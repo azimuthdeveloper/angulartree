@@ -1,11 +1,15 @@
-<cdk-tree [dataSource]="nestedDataSource" [treeControl]="nestedTreeControl"
-          style="display: flex; flex-direction: column" [trackBy]="trackBy">
-  <cdk-nested-tree-node *cdkTreeNodeDef="let node" class="example-tree-node">
+<cdk-tree [dataSource]="nestedDataSource" [childrenAccessor]="childrenAccessor"
+          style="display: flex; flex-direction: column" [trackBy]="trackBy" #tree>
+
+  <cdk-nested-tree-node *cdkTreeNodeDef="let _node" class="example-tree-node" (expandedChange)="handleNodeExpansion($event, _node)">
+
+    @let node = _node | asNestedTreeNode;
+
     <div style="flex-direction: row">
-      @if ((node | asTreeNode).expandable()) {
+      @if (node.expandable()) {
         <button mat-icon-button cdkTreeNodeToggle>
           <mat-icon>
-            @if (nestedTreeControl.isExpanded(node)) {
+            @if (tree.isExpanded(node)) {
               expand_more
             } @else {
               chevron_right
@@ -14,18 +18,18 @@
         </button>
       }
 
-      <input type="checkbox" [checked]="(node | asTreeNode).selected()" (change)="handleNodeSelectionChange(node, $any($event.target).checked)" >
+      <input type="checkbox" [checked]="node.selected()" (change)="handleNodeSelectionChange(node, $any($event.target).checked)" >
 
-      {{ (node | asTreeNode).data.item }}
-      @if ((node |asTreeNode).loading()) {
+      {{ node.data.item }}
+      @if (node.loading()) {
         Loading...
       }
 
     </div>
-    @if ((node | asTreeNode).options().has(TreeOption.Last)){
+    @if (node.options().has(TreeOption.Last)){
       <button (click)="loadMore(node)">Load more</button>
     }
-    @if (nestedTreeControl.isExpanded(node)) {
+    @if (tree.isExpanded(node)) {
       <div style="display: flex; flex-direction: column">
         <ng-container cdkTreeNodeOutlet>
         </ng-container>

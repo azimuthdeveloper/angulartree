@@ -1,11 +1,15 @@
-<cdk-tree [dataSource]="nestedDataSource" [treeControl]="nestedTreeControl"
-          style="display: flex; flex-direction: column" [trackBy]="trackBy">
-  <cdk-nested-tree-node *cdkTreeNodeDef="let node" class="example-tree-node">
+<cdk-tree [dataSource]="nestedDataSource"
+          [childrenAccessor]="childrenAccessor"
+          style="display: flex; flex-direction: column" [trackBy]="trackBy" #tree>
+  <cdk-nested-tree-node *cdkTreeNodeDef="let _node" class="example-tree-node" (expandedChange)="handleNodeExpansion($event, _node)">
+
+    @let node = _node | asPokemonNode;
+
     <div style="flex-direction: row">
-      @if ((node | asPokemonNode).expandable) {
+      @if (node.expandable) {
         <button mat-icon-button cdkTreeNodeToggle>
           <mat-icon>
-            @if (nestedTreeControl.isExpanded(node)) {
+            @if (tree.isExpanded(node)) {
               expand_more
             } @else {
               chevron_right
@@ -18,23 +22,23 @@
         </button>
       }
 
-      {{ (node | asPokemonNode).label }}
+      {{ node.label }}
       <!--      {{(node | asPokemonNode).data | json}}-->
-      @if ((node |asPokemonNode).loading()) {
+      @if (node.loading()) {
         Loading...
       }
 
-      @if ((node | asPokemonNode).parent) {
-        @if (isLast(node, node.parent?.children | async)) {
+      @if (node.parent) {
+        @if (isLast(node, node.parent.children | async)) {
           <button
-            (click)="loadMore(node.parent.type, indexOf(node, node.parent.children.value), node.parent.parent.label, node.parent)">
+            (click)="loadMore(node.parent!.type, indexOf(node, node.parent!.children.value), node.parent!.parent!.label, node.parent!)">
             Load more...
           </button>
         }
       }
 
     </div>
-    @if (nestedTreeControl.isExpanded(node)) {
+    @if (tree.isExpanded(node)) {
       <div style="display: flex; flex-direction: column; padding-left: 16px; border: 2px solid black">
         <ng-container cdkTreeNodeOutlet>
         </ng-container>

@@ -46,7 +46,7 @@ export class FlatTreeComponent implements OnInit {
   datasource: FlatTreeDataSource;
 
   constructor(private dataService: DataService) {
-    this.datasource = new FlatTreeDataSource(dataService, this.tree?._getExpansionModel());
+    this.datasource = new FlatTreeDataSource(dataService);
 
   }
 
@@ -83,6 +83,8 @@ export class FlatTreeComponent implements OnInit {
       this.datasource.toggleNode(node, false);
     }
   }
+
+  protected readonly FlatTreeNode = FlatTreeNode;
 }
 
 export class FlatTreeNode {
@@ -102,15 +104,9 @@ export class FlatTreeNode {
 
 
 class FlatTreeDataSource implements DataSource<FlatTreeNode> {
-
-  // checkedNodes = computed(() => {
-  //   // debugger;
-  //   return this.dataChange.value.filter(x => x.selected());
-  // });
-
   dataChange = new BehaviorSubject<FlatTreeNode[]>([]);
 
-  constructor(private _api: DataService, private expansionModel: SelectionModel<FlatTreeNode> | undefined) {
+  constructor(private _api: DataService) {
   }
 
   get data(): FlatTreeNode[] {
@@ -123,7 +119,6 @@ class FlatTreeDataSource implements DataSource<FlatTreeNode> {
   }
 
   toggleNodeSelection(node: FlatTreeNode) {
-    // debugger;
     node.selected.update(x => !x);
   }
 
@@ -133,33 +128,11 @@ class FlatTreeDataSource implements DataSource<FlatTreeNode> {
   }
 
   connect(collectionViewer: CollectionViewer): Observable<FlatTreeNode[]> {
-    this.expansionModel?.changed.subscribe(change => {
-      if (
-        (change as SelectionChange<FlatTreeNode>).added ||
-        (change as SelectionChange<FlatTreeNode>).removed
-      ) {
-        this.handleTreeControl(change as SelectionChange<FlatTreeNode>);
-      }
-    });
     return this.dataChange;
   }
 
   disconnect(collectionViewer: CollectionViewer): void {
 
-  }
-
-  /** Handle expand/collapse behaviors */
-  handleTreeControl(change: SelectionChange<FlatTreeNode>) {
-    // debugger;
-    if (change.added) {
-      change.added.forEach(node => this.toggleNode(node, true));
-    }
-    if (change.removed) {
-      change.removed
-        .slice()
-        .reverse()
-        .forEach(node => this.toggleNode(node, false));
-    }
   }
 
   async loadMore(node: FlatTreeNode){
@@ -171,9 +144,6 @@ class FlatTreeDataSource implements DataSource<FlatTreeNode> {
     node.loading.set(false);
   }
 
-  /**
-   * Toggle the node, remove from display list
-   */
   async toggleNode(node: FlatTreeNode, expand: boolean) {
     // Retrieve the index of the node that is asking for expansion
     const index = this.data.indexOf(node);

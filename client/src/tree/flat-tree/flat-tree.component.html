@@ -7,16 +7,18 @@
   {{ selectedNodes() | json }}
 </div>
 <cdk-tree [dataSource]="datasource" #tree [levelAccessor]="treeLevelAccessor">
-  <cdk-tree-node *cdkTreeNodeDef="let node" cdkTreeNodePadding
-                 class="tree-node" (expandedChange)="handleNodeExpansionStateChange($event, node)" >
-<!--    @if (node | asTreeNode) {-->
-
-<!--    }-->
+  <!-- Below, 'let _node' removes type information :(-->
+  <cdk-tree-node *cdkTreeNodeDef="let _node"
+                 cdkTreeNodePadding
+                 class="tree-node" (expandedChange)="handleNodeExpansionStateChange($event, _node)" >
+    <!-- We can re-add the type information with a pipe and @let :) -->
+    @let node = _node | asTreeNode;
     <div style="display: flex; flex-direction: row; align-items: center; justify-items: end">
+      <!-- All calls to 'node' are now typed as FlatTreeNode -->
       @if (hasChild(node)) {
         <button mat-icon-button cdkTreeNodeToggle
-                [attr.aria-label]="'Toggle ' + node.name"
-                [style.visibility]="node.expandable ? 'visible' : 'hidden'">
+                [attr.aria-label]="'Toggle ' + node.data.item"
+                [style.visibility]="node.expandable() ? 'visible' : 'hidden'">
           <mat-icon class="mat-icon-rtl-mirror">
             {{ tree.isExpanded(node) ? 'expand_more' : 'chevron_right' }}
           </mat-icon>
@@ -24,14 +26,14 @@
       } @else {
         <button mat-icon-button disabled cdkTreeNodePadding></button>
       }
-      <input type="checkbox" [value]="(node | asTreeNode).selected()" (click)="toggleNodeSelect(node)">
-      {{ (node | asTreeNode).data.item }}
-      @if ((node | asTreeNode).loading()) {
+      <input type="checkbox" [value]="node.selected()" (click)="toggleNodeSelect(node)">
+      {{ node.data.item }}
+      @if (node.loading()) {
         Loading...
       }
     </div>
 
-    @if ((node | asTreeNode).options().has(TreeOption.Last)) {
+    @if (node.options().has(TreeOption.Last)) {
       <button (click)="loadMore(node)">Load more...</button>
     }
   </cdk-tree-node>

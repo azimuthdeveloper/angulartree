@@ -7,8 +7,7 @@ import {
   CdkTree,
   CdkTreeNodeDef,
   CdkTreeNodeOutlet,
-  CdkTreeNodeToggle,
-  NestedTreeControl
+  CdkTreeNodeToggle
 } from "@angular/cdk/tree";
 import {MatIcon} from "@angular/material/icon";
 import {MatIconButton} from "@angular/material/button";
@@ -17,6 +16,7 @@ import {MatTreeNestedDataSource} from "@angular/material/tree";
 import {AsTreeNodePipe} from "../../pipes/as-tree-node.pipe";
 import {FormsModule} from "@angular/forms";
 import {JsonPipe} from "@angular/common";
+import {AsNestedTreeNodePipe} from "../../pipes/as-nested-tree-node.pipe";
 
 @Component({
   selector: 'app-nested-tree',
@@ -34,13 +34,14 @@ import {JsonPipe} from "@angular/common";
     MatIconButton,
     AsTreeNodePipe,
     FormsModule,
-    JsonPipe
+    JsonPipe,
+    AsNestedTreeNodePipe
   ],
   templateUrl: './nested-tree.component.html',
   styleUrl: './nested-tree.component.scss'
 })
 export class NestedTreeComponent implements OnInit {
-  nestedTreeControl: NestedTreeControl<NestedTreeNode>;
+  // nestedTreeControl: NestedTreeControl<NestedTreeNode>;
   nestedDataSource: MatTreeNestedDataSource<NestedTreeNode>;
 
   selectedNodes = signal<Array<NestedTreeNode>>([]);
@@ -48,18 +49,18 @@ export class NestedTreeComponent implements OnInit {
   private subscription?: Subscription;
 
   constructor(private data: DataService) {
-    this.nestedTreeControl = new NestedTreeControl<NestedTreeNode>(x => x.children);
+    // this.nestedTreeControl = new NestedTreeControl<NestedTreeNode>(x => x.children);
     this.nestedDataSource = new MatTreeNestedDataSource<NestedTreeNode>();
   }
 
   async ngOnInit() {
     let rootNodes = await firstValueFrom(this.data.longDataGet(0, 10));
     this.nestedDataSource.data = rootNodes.map(x => new NestedTreeNode(0, x));
-    this.subscription = this.nestedTreeControl.expansionModel.changed.subscribe(change => {
-      if (change.added || change.removed) {
-        this.handleTreeControl(change);
-      }
-    })
+    // this.subscription = this.nestedTreeControl.expansionModel.changed.subscribe(change => {
+    //   if (change.added || change.removed) {
+    //     this.handleTreeControl(change);
+    //   }
+    // })
   }
 
   trackBy(_: number, node: NestedTreeNode){
@@ -88,14 +89,14 @@ export class NestedTreeComponent implements OnInit {
   }
 
 
-  private handleTreeControl(change: SelectionChange<NestedTreeNode>) {
-    if (change.added) {
-      change.added.forEach(x => this.toggleNode(x, true));
-    }
-    if (change.removed) {
-      change.removed.slice().reverse().forEach(x => this.toggleNode(x, false));
-    }
-  }
+  // private handleTreeControl(change: SelectionChange<NestedTreeNode>) {
+  //   if (change.added) {
+  //     change.added.forEach(x => this.toggleNode(x, true));
+  //   }
+  //   if (change.removed) {
+  //     change.removed.slice().reverse().forEach(x => this.toggleNode(x, false));
+  //   }
+  // }
 
   protected readonly TreeOption = TreeOption;
 
@@ -133,6 +134,7 @@ export class NestedTreeComponent implements OnInit {
   //
   //   })
   // }
+  childrenAccessor = (dataNode: NestedTreeNode) => dataNode.children;
 
   handleNodeSelectionChange(node: NestedTreeNode, checked: boolean) {
     if (checked){
@@ -149,6 +151,11 @@ export class NestedTreeComponent implements OnInit {
         return x;
       })
     }
+  }
+
+  handleNodeExpansion($event: boolean, node : NestedTreeNode) {
+    this.toggleNode(node, $event);
+
   }
 }
 
